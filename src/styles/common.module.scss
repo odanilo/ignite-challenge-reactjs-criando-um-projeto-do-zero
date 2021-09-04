@@ -1,1 +1,19 @@
-// TODO
+.container {
+  margin: 0 auto;
+  max-width: 1120px;
+  padding: 0 2rem;
+}
+
+.simpleButton {
+  background: transparent;
+  border: 0;
+  color: var(--hightlight);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
