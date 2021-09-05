@@ -67,11 +67,11 @@ export default function Home({
                       <h3>{post.data.subtitle}</h3>
                       <footer>
                         <time>
-                          <FiCalendar />
+                          <FiCalendar className={commonStyles.icon} />
                           <span>{formatDate(post.first_publication_date)}</span>
                         </time>
                         <div>
-                          <FiUser />
+                          <FiUser className={commonStyles.icon} />
                           <span>{post.data.author}</span>
                         </div>
                       </footer>
