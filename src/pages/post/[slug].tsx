@@ -13,6 +13,7 @@ import { calculateTimeToReadWords } from '../../utils/calculateTimeToReadWords';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { PreviewButton } from '../../components/PreviewButton';
+import { CommentsSection } from '../../components/CommentsSection';
 
 interface Post {
   first_publication_date: string | null;
@@ -90,6 +91,13 @@ export default function Post({ post, preview }: PostProps): JSX.Element {
             className={`${commonStyles.articleContainer} ${styles.bodyContent}`}
             dangerouslySetInnerHTML={{ __html: contentAsHtml }}
           />
+
+          <div
+            className={`${commonStyles.articleContainer} ${styles.comments}`}
+          >
+            <CommentsSection />
+          </div>
+
           {preview && (
             <aside
               className={`${commonStyles.articleContainer} ${styles.previewButtonContainer}`}
