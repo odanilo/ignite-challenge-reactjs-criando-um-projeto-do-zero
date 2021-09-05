@@ -12,6 +12,7 @@ import { calculateTimeToReadWords } from '../../utils/calculateTimeToReadWords';
 
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import { PreviewButton } from '../../components/PreviewButton';
 
 interface Post {
   first_publication_date: string | null;
@@ -32,9 +33,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: boolean;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({ post, preview }: PostProps): JSX.Element {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -88,6 +90,13 @@ export default function Post({ post }: PostProps): JSX.Element {
             className={`${commonStyles.articleContainer} ${styles.bodyContent}`}
             dangerouslySetInnerHTML={{ __html: contentAsHtml }}
           />
+          {preview && (
+            <aside
+              className={`${commonStyles.articleContainer} ${styles.previewButtonContainer}`}
+            >
+              <PreviewButton />
+            </aside>
+          )}
         </div>
       </article>
     </>
@@ -112,10 +121,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const prismic = getPrismicClient();
   const slug = String(params.slug);
-  const response = await prismic.getByUID('posts', slug, {});
+  const response = await prismic.getByUID('posts', slug, {
+    ref: previewData?.ref ?? null,
+  });
 
   return {
     props: {
@@ -132,6 +147,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
           content: response.data.content,
         },
       },
+      preview,
     },
     revalidate: 60 * 60 * 24, // 1 dia
   };
