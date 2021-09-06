@@ -14,8 +14,10 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { PreviewButton } from '../../components/PreviewButton';
 import { CommentsSection } from '../../components/CommentsSection';
+import { PostNavigation } from '../../components/PostNavigation';
 
 interface Post {
+  uid: string;
   first_publication_date: string | null;
   data: {
     title: string;
@@ -32,12 +34,24 @@ interface Post {
   };
 }
 
+interface NavigationalPost {
+  title: null | string;
+  slug: null | string;
+}
+
 interface PostProps {
   post: Post;
   preview: boolean;
+  previousPostData: NavigationalPost;
+  nextPostData: NavigationalPost;
 }
 
-export default function Post({ post, preview }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  preview,
+  previousPostData,
+  nextPostData,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -93,6 +107,15 @@ export default function Post({ post, preview }: PostProps): JSX.Element {
           />
 
           <div
+            className={`${commonStyles.articleContainer} ${styles.postsNavigation}`}
+          >
+            <PostNavigation
+              nextPost={nextPostData}
+              previousPost={previousPostData}
+            />
+          </div>
+
+          <div
             className={`${commonStyles.articleContainer} ${styles.comments}`}
           >
             <CommentsSection />
@@ -140,22 +163,58 @@ export const getStaticProps: GetStaticProps = async ({
     ref: previewData?.ref ?? null,
   });
 
+  const previousPost = await prismic.query(
+    Prismic.predicates.at('document.type', 'posts'),
+    {
+      fetch: ['posts.title'],
+      orderings: '[document.first_publication_date desc]',
+      pageSize: 1,
+      after: response.id,
+    }
+  );
+
+  const previousPostData = {
+    type: 'previous',
+    title:
+      previousPost.results_size > 0 ? previousPost.results[0].data.title : null,
+    slug: previousPost.results_size > 0 ? previousPost.results[0].uid : null,
+  };
+
+  const nextPost = await prismic.query(
+    Prismic.predicates.at('document.type', 'posts'),
+    {
+      fetch: ['posts.title'],
+      orderings: '[document.first_publication_date]',
+      pageSize: 1,
+      after: response.id,
+    }
+  );
+
+  const nextPostData = {
+    title: nextPost.results_size > 0 ? nextPost.results[0].data.title : null,
+    slug: nextPost.results_size > 0 ? nextPost.results[0].uid : null,
+  };
+
+  const postData = {
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
+    data: {
+      title: response.data.title,
+      subtitle: response.data.subtitle,
+      banner: {
+        url: response.data.banner.url,
+      },
+      author: response.data.author,
+      content: response.data.content,
+    },
+  };
+
   return {
     props: {
-      post: {
-        uid: response.uid,
-        first_publication_date: response.first_publication_date,
-        data: {
-          title: response.data.title,
-          subtitle: response.data.subtitle,
-          banner: {
-            url: response.data.banner.url,
-          },
-          author: response.data.author,
-          content: response.data.content,
-        },
-      },
+      post: postData,
       preview,
+      previousPostData,
+      nextPostData,
     },
     revalidate: 60 * 60 * 24, // 1 dia
   };
