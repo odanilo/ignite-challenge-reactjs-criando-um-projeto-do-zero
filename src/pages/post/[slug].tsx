@@ -19,6 +19,7 @@ import { PostNavigation } from '../../components/PostNavigation';
 interface Post {
   uid: string;
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -86,7 +87,7 @@ export default function Post({
             <div className={commonStyles.articleContainer}>
               <h1>{post.data.title}</h1>
               <footer>
-                <time>
+                <time dateTime={post.first_publication_date}>
                   <FiCalendar className={commonStyles.icon} />
                   <span>{formatDate(post.first_publication_date)}</span>
                 </time>
@@ -99,6 +100,17 @@ export default function Post({
                   <span>{minutesToReadPost} min</span>
                 </div>
               </footer>
+              {post.last_publication_date && (
+                <time
+                  dateTime={post.last_publication_date}
+                  className={styles.updatedAt}
+                >
+                  {formatDate(
+                    post.last_publication_date,
+                    "'* editado em 'dd MMM yyyy', às 'kk':'mm"
+                  )}
+                </time>
+              )}
             </div>
           </header>
           <main
@@ -198,6 +210,7 @@ export const getStaticProps: GetStaticProps = async ({
   const postData = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
